@@ -13,6 +13,8 @@ dependencies = [
     "pymysql>=1.2.0",
     "sqlalchemy>=2.0.52",
     "uvicorn[standard]>=0.52.4",
+    "openai>=1.0.0",
+    "numpy>=2.0.0"
 ]
 
 [project.scripts]

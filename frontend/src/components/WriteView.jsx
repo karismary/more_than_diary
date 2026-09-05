@@ -4,14 +4,25 @@ import { CheckCircle2, Save } from 'lucide-react';
 export default function WriteView({ today, onSave }) {
   const [content, setContent] = useState('');
   const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const text = content.trim();
-    if (!text) return;
-    onSave(text);
-    setContent('');
-    setSaved(true);
-    window.setTimeout(() => setSaved(false), 1800);
+    if (!text || busy) return;
+
+    setBusy(true);
+    setError('');
+    try {
+      await onSave(text);
+      setContent('');
+      setSaved(true);
+      window.setTimeout(() => setSaved(false), 1800);
+    } catch (requestError) {
+      setError(requestError.message);
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -30,12 +41,13 @@ export default function WriteView({ today, onSave }) {
         <button
           className="btn btn-primary"
           onClick={handleSave}
-          disabled={!content.trim()}
+          disabled={!content.trim() || busy}
         >
           {saved ? <CheckCircle2 size={16} /> : <Save size={16} />}
-          {saved ? '已保存' : '保存日记'}
+          {busy ? '正在索引…' : saved ? '已保存' : '保存日记'}
         </button>
       </div>
+      {error && <div className="error-note">{error}</div>}
     </section>
   );
 }

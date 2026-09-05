@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowUp } from 'lucide-react';
-import { askDiary, formatDateLabel, suggestQuestions } from '../mock';
+import { askDiary } from '../api';
 
 let messageSeq = 0;
 
@@ -42,17 +42,26 @@ export default function AskView() {
     setInput('');
     setBusy(true);
 
-    window.setTimeout(() => {
-      const result = askDiary(question);
-      setMessages((prev) =>
-        prev.map((message) =>
-          message.id === pendingId
-            ? { ...message, loading: false, content: result.answer, sources: result.sources }
-            : message,
-        ),
-      );
-      setBusy(false);
-    }, 650);
+    askDiary(question)
+      .then((result) => {
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === pendingId
+              ? { ...message, loading: false, content: result.answer, sources: result.sources }
+              : message,
+          ),
+        );
+      })
+      .catch((error) => {
+        setMessages((prev) =>
+          prev.map((message) =>
+            message.id === pendingId
+              ? { ...message, loading: false, content: `请求失败：${error.message}` }
+              : message,
+          ),
+        );
+      })
+      .finally(() => setBusy(false));
   };
 
   const handleSubmit = (event) => {
@@ -74,20 +83,13 @@ export default function AskView() {
             {message.sources?.length > 0 && (
               <div className="sources">
                 {message.sources.map((source) => (
-                  <span key={source.id} className="source-chip">
-                    {formatDateLabel(source.date)} · {source.title}
+                  <span key={source.fragment_id} className="source-chip">
+                    日记 #{source.entry_id} · 片段 #{source.fragment_id} · 相似度 {source.score.toFixed(2)}
                   </span>
                 ))}
               </div>
             )}
           </div>
-        ))}
-      </div>
-      <div className="quick-row">
-        {suggestQuestions().map((question) => (
-          <button key={question} className="quick-btn" onClick={() => send(question)}>
-            {question}
-          </button>
         ))}
       </div>
       <form className="chat-input" onSubmit={handleSubmit}>

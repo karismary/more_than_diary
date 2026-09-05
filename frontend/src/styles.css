@@ -220,6 +220,12 @@ button {
   margin-top: 16px;
 }
 
+.error-note {
+  margin-top: 12px;
+  color: var(--danger);
+  font-size: 13px;
+}
+
 .btn {
   display: inline-flex;
   align-items: center;

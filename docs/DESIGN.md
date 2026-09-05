@@ -105,7 +105,7 @@ Diary RAG 是一个带 AI 对话能力的本地日记工具。用户写下的每
 | 向量记录 Vector | id、chunk_id、embedding、dim、model | 某个模型的向量结果 |
 | 索引任务 IndexJob | id、type、status、progress、error | 记录索引进度和失败原因 |
 
-详细表结构和字段约束见 `TECH_DESIGN.md`。
+详细表结构和字段约束见 [技术设计文档](TECH_DESIGN.md)。
 
 ## 8. 接口设计（概要）
 

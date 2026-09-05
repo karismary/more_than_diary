@@ -36,8 +36,11 @@ similarity = dot(query, doc) / (norm(query) * norm(doc))
 
 ```text
 diary_app/
-├── DESIGN.md
-├── TECH_DESIGN.md
+├── README.md
+├── docs/
+│   ├── DESIGN.md
+│   ├── TECH_DESIGN.md
+│   └── OLLAMA_API.md
 ├── backend/
 │   ├── .python-version
 │   ├── pyproject.toml

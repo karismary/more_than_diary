@@ -4,7 +4,8 @@ import WriteView from './components/WriteView';
 import DiaryView from './components/DiaryView';
 import AskView from './components/AskView';
 import IndexView from './components/IndexView';
-import { loadEntries, saveEntries, todayLabel } from './mock';
+import { createEntry, deleteEntry, loadEntries } from './api';
+import { todayLabel } from './mock';
 
 const viewTitles = {
   write: '写日记',
@@ -14,10 +15,19 @@ const viewTitles = {
 };
 
 export default function App() {
-  const [entries, setEntries] = useState(loadEntries);
+  const [entries, setEntries] = useState([]);
   const [activeView, setActiveView] = useState('write');
-  const [selectedId, setSelectedId] = useState(entries[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState(null);
   const [toast, setToast] = useState('');
+
+  useEffect(() => {
+    loadEntries()
+      .then((items) => {
+        setEntries(items);
+        setSelectedId(items[0]?.id ?? null);
+      })
+      .catch((error) => setToast(error.message));
+  }, []);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -25,22 +35,17 @@ export default function App() {
     return () => window.clearTimeout(timer);
   }, [toast]);
 
-  const handleSave = (content) => {
-    const now = new Date();
-    const date = now.toISOString().slice(0, 10);
-    const time = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    const entry = { id: `entry-${Date.now()}`, date, time, content };
-    const next = [entry, ...entries];
-    setEntries(next);
-    saveEntries(next);
+  const handleSave = async (content) => {
+    const entry = await createEntry(content);
+    setEntries((prev) => [entry, ...prev]);
     setSelectedId(entry.id);
     setToast('日记已保存');
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    await deleteEntry(id);
     const next = entries.filter((entry) => entry.id !== id);
     setEntries(next);
-    saveEntries(next);
     if (selectedId === id) {
       setSelectedId(next[0]?.id ?? null);
     }
