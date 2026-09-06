@@ -30,13 +30,21 @@ class IntentResult(BaseModel):
         }
 
 class IntentClassifier:
-    def __init__(self) -> None:
+    """意图分类（走 LLM）。传入可选覆盖，None 则回落 .env 配置。"""
+
+    def __init__(
+        self,
+        *,
+        base_url: str | None = None,
+        api_key: str | None = None,
+        model: str | None = None,
+    ) -> None:
         settings = get_settings()
 
-        self.model = settings.llm_model
+        self.model = model or settings.llm_model
         self.client = OpenAI(
-            base_url=settings.llm_base_url,
-            api_key=settings.llm_api_key,
+            base_url=base_url or settings.llm_base_url,
+            api_key=api_key or settings.llm_api_key,
         )
 
     def classify(self, question: str) -> IntentResult:

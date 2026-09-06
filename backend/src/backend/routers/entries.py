@@ -9,6 +9,7 @@ from backend.models import Entry, Fragment, Vector
 from backend.schemas import EntryCreate, EntryResponse
 from backend.services.embedding import OpenAIEmbedder
 from backend.services.indexing import index_entry
+from backend.services.runtime_settings import embed_kwargs
 
 router = APIRouter(
     prefix="/entries",
@@ -27,19 +28,24 @@ def create_entry(
     payload: EntryCreate,
     db: DbSession,
 ) -> Entry:
-    entry = Entry(content=payload.content)
+    entry = Entry(
+        content=payload.content,
+        mood=payload.mood,
+        place=payload.place,
+        weather=payload.weather,
+    )
 
     db.add(entry)
     db.commit()
     db.refresh(entry)
     
-    embedder = OpenAIEmbedder()
+    embedder = OpenAIEmbedder(**embed_kwargs(db))
 
     index_entry(
         db=db,
         entry=entry,
         embedder=embedder,
-)
+    )
 
     return entry
 

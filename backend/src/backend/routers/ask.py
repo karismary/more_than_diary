@@ -19,6 +19,7 @@ from backend.schemas import (
     DiarySourceResponse,
 )
 from backend.services.intent import Intent, IntentClassifier
+from backend.services.runtime_settings import embed_kwargs, llm_kwargs
 
 router = APIRouter(
     prefix="/ask",
@@ -33,9 +34,9 @@ DbSession = Annotated[Session, Depends(get_db)]
 )
 def ask(
     payload: AskRequest,
-    db: DbSession, 
+    db: DbSession,
 ) -> AskResponse:
-    classifier = IntentClassifier()
+    classifier = IntentClassifier(**llm_kwargs(db))
     intent_result = classifier.classify(payload.question)
 
     if intent_result.intent == Intent.SUMMARY:
@@ -50,7 +51,7 @@ def ask(
         ]
 
     elif intent_result.needs_diary:
-        embedder = OpenAIEmbedder()
+        embedder = OpenAIEmbedder(**embed_kwargs(db))
         query_embedding = embedder.embed([payload.question])[0]
         query_vector = np.asarray(query_embedding, dtype=np.float32)
 
@@ -86,7 +87,7 @@ def ask(
         context = ""
         sources = []
 
-    chat_model = OpenAIChatModel()
+    chat_model = OpenAIChatModel(**llm_kwargs(db))
     answer = chat_model.generate(
         question=payload.question,
         context=context,

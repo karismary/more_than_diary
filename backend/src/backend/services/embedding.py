@@ -5,15 +5,24 @@ from backend.config import get_settings
 
 
 class OpenAIEmbedder:
-    def __init__(self) -> None:
+    """OpenAI 兼容的 embedding 客户端。传入可选覆盖，None 则回落 .env 配置。"""
+
+    def __init__(
+        self,
+        *,
+        base_url: str | None = None,
+        api_key: str | None = None,
+        model: str | None = None,
+        dim: int | None = None,
+    ) -> None:
         settings = get_settings()
 
-        self.model = settings.embedding_model
-        self.dim = settings.embedding_dim
+        self.model = model or settings.embedding_model
+        self.dim = dim if dim is not None else settings.embedding_dim
 
         self.client = OpenAI(
-            base_url=settings.embedding_base_url,
-            api_key=settings.embedding_api_key,
+            base_url=base_url or settings.embedding_base_url,
+            api_key=api_key or settings.embedding_api_key,
         )
 
     def embed(self, texts: list[str]) -> list[list[float]]:
