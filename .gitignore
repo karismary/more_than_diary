@@ -1,6 +1,7 @@
 node_modules/
 frontend/node_modules/
 frontend/dist/
+opendesign/
 
 # Python environments and generated files
 backend/.venv/
